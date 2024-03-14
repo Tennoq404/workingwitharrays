@@ -71,7 +71,7 @@ const displayMovements = function (movements) {
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-      <div class="movements__value">${mov}</div>
+      <div class="movements__value">${mov}$</div>
     </div>`;
 
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -97,6 +97,47 @@ const calcPrintBalance = function (movements) {
   labelBalance.textContent = `${balance} EUR`;
 };
 calcPrintBalance(account1.movements);
+
+const calcdisplaySummary = function (movements) {
+  const incomes = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${incomes}$`;
+
+  const out = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(out)}$`;
+
+  const instrest = movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * 1.2) / 100)
+    .filter((int, i, arr) => {
+      console.log(arr);
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = instrest;
+};
+calcdisplaySummary(account1.movements);
+
+let currentaccount;
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault();
+  console.log('LOGIN');
+  // the default behavior of a form element is to refresh itself once the
+  // submit character is clicked
+  // but the prevent default prevents it from submitting the form
+  currentaccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+  console.log(currentaccount);
+  if (currentaccount?.pin === Number(inputLoginPin.value)) {
+    console.log('Login');
+  }
+});
+// we need to find the account from the accounts array that the user inputed
+
 //0ur aim here was to to get the firstletter of each word in the name
 
 /////////////////////////////////////////////////
@@ -264,7 +305,30 @@ const maxwell2 = maxwell.reduce((acc, cur) => acc + cur, 0);
 console.log(maxwell2);
 
 const max = movements.reduce((acc, cur) => {
-  if (acc > mov) return acc;
+  if (acc > cur) return acc;
   else return cur;
 }, movements[0]);
 console.log(max);
+
+const eurToUsd1 = 1.1;
+const totalDepositUSD = movements
+  .filter(mov => mov < 0)
+  .map(mov => mov * eurToUsd1)
+  .reduce((acc, mov) => acc + mov, 0);
+console.log(totalDepositUSD);
+// sometimes with this methos we might get a few errors.. based on the fact
+//that we cannot actually see the outcome of the methods.. but there is a certain way we can
+// do it.. we can use the arr argument.. we can long the arr argument in the second metho
+
+const myfriends = ['chesky', 'ningz', 'maf', 'j-bo'];
+
+const newfriends = myfriends.map(letter => letter.slice(-1));
+console.log(newfriends);
+
+//THE FIND METHOD
+
+const firstWithdrawal = movements.find(mov => mov < 0);
+console.log(movements);
+console.log(firstWithdrawal);
+
+const account = accounts.find(acc => acc.owner === 'Jessica Davis');
