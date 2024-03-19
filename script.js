@@ -77,7 +77,6 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-displayMovements(account1.movements);
 
 const createUserNames = function (accs) {
   accs.forEach(function (acc) {
@@ -92,11 +91,19 @@ const createUserNames = function (accs) {
 
 createUserNames(accounts);
 
-const calcPrintBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${balance} EUR`;
+const updateUi = function (acc) {
+  //display movements
+  displayMovements(acc.movements);
+  // display balance
+  calcPrintBalance(acc);
+  // display summary
+  calcdisplaySummary(acc.movements);
 };
-calcPrintBalance(account1.movements);
+
+const calcPrintBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${acc.balance} EUR`;
+};
 
 const calcdisplaySummary = function (movements) {
   const incomes = movements
@@ -119,7 +126,6 @@ const calcdisplaySummary = function (movements) {
     .reduce((acc, int) => acc + int, 0);
   labelSumInterest.textContent = instrest;
 };
-calcdisplaySummary(account1.movements);
 
 let currentaccount;
 btnLogin.addEventListener('click', function (e) {
@@ -133,9 +139,77 @@ btnLogin.addEventListener('click', function (e) {
   );
   console.log(currentaccount);
   if (currentaccount?.pin === Number(inputLoginPin.value)) {
-    console.log('Login');
+    ///didplsy Ui and a welcome message
+
+    labelWelcome.textContent = `Welcome back, ${
+      currentaccount.owner.split(' ')[0]
+    }`;
+    containerApp.style.opacity = 100;
+
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    updateUi(currentaccount);
   }
 });
+
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    acc => acc.username === inputTransferTo.value
+  );
+  inputTransferAmount.value = inputTransferTo.value = '';
+
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentaccount.balance >= amount &&
+    receiverAcc?.username != currentaccount.username
+  ) {
+    console.log(`Transfer valid`);
+    currentaccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    updateUi(currentaccount);
+  }
+});
+
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+
+  if (amount > 0 && currentaccount.movements.some(mov => mov >= amount * 0.1)) {
+    //add movemrnt
+    currentaccount.movements.push(amount);
+
+    updateUi(currentaccount);
+  } else {
+    alert('No do pass your self');
+  }
+  inputTransferAmount.value = inputTransferTo.value = '';
+});
+
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+  console.log('Delete');
+  if (
+    inputCloseUsername.value === currentaccount &&
+    Number(inputClosePin.value) === currentaccount.pin
+  ) {
+    const index = accounts.findIndex(
+      acc => (acc.username = currentaccount.username)
+    );
+
+    console.log(index);
+
+    accounts.splice(index, 1);
+
+    containerApp.style.opacity = 0;
+  }
+  inputCloseUsername.value = inputClosePin.value = '';
+});
+
 // we need to find the account from the accounts array that the user inputed
 
 //0ur aim here was to to get the firstletter of each word in the name
@@ -332,3 +406,46 @@ console.log(movements);
 console.log(firstWithdrawal);
 
 const account = accounts.find(acc => acc.owner === 'Jessica Davis');
+
+//Find index
+//find index returns of the found element and not the element itself
+
+//SOME AND EVERY METHODS
+console.log(movements);
+console.log(movements.includes(-130));
+// the includes value checks if any value is exactly equal to the arguments given
+// while the some method checks for conditions
+//therefore it retutns a boolean
+
+const anyDeposits = movements.some(mov => mov > 0);
+// if there is any value that is satifies the argument the some method returns true
+
+movements.some;
+
+//EVERY
+console.log(movements.every(mov => mov > 0));
+console.log(account4.movements.every(mov => mov > 0));
+// the every method is a method that only returns
+//its supposed value if every value in the array passes the test
+
+//separate callback
+const deposit = mov => mov > 0;
+console.log(movements.every(deposits));
+console.log(movements.filter(deposits));
+//flat method
+
+const arr = [[1, 2, 3], [4, 5, 6], 7, 8];
+console.log(arr.flat());
+const arrDeep = [[[1, 2], 3], [(4)[(5, 6)]], 7, 8];
+console.log(arrDeep.flat(2));
+
+const accountMovemts = accounts.map(acc => acc.movements);
+console.log(accountMovemts);
+const allMovements = accountMovemts.flat();
+console.log(allMovements);
+/*
+const overalBalance = allMovements.reduce((acc, mov) => acc + mov, 0);
+console.log(overalBalance);
+
+const overalBalance = acc;
+*/
